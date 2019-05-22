@@ -1,3 +1,4 @@
 __pycache__/
 .*/
 test/path_resolver_test.py
+lib/graph_resolver.py

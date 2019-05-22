@@ -1,8 +1,13 @@
-from models.models import FrequencySlice, Transponder, Band, Demand
-from lib.graphical import GraphicalTSP
+from models.models import Transponder, Band, Demand
+from lib.graphical import Graphical
 from lib.tsp import TSP
+from lib.read_demands import read_demands
+import xml.etree.ElementTree as ET
 import numpy as np
 
+
+tree = ET.parse('data/polska.xml')
+data_xml_root = tree.getroot()
 
 transponders = [
     Transponder(id=1, bitrate=40, power_budget=10,
@@ -21,3 +26,9 @@ bands = [
     Band(id=2, cost=2, frequency_range_from=385,
          frequency_range_to=768, loss_per_km=0.055),
 ]
+
+demands = read_demands(data_xml_root)
+
+tsp = TSP(Graphical(data_xml_root))
+
+print(tsp.path_length(demands[0].paths[0]))

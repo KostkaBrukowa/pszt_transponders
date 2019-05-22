@@ -3,8 +3,8 @@ Map represents the map of all points in the problem.
 """
 import numpy as np
 from typing import List, Tuple
-from .graph_resolver import GraphResolver
-from .graphical import GraphicalTSP
+from .graphical import Graphical
+from .graph_resolver import build_dist_map
 
 
 def euclidean_distance(a, b):
@@ -25,7 +25,7 @@ def euclidean_distance(a, b):
 
 
 class TSP():
-    def __init__(self, graphical_tsp: GraphicalTSP, distance_function ='euclidean') -> None:
+    def __init__(self, graphical_tsp: Graphical, distance_function='euclidean') -> None:
         '''
         Builds the map from the file given in filename kwarg
         or from array of points(2-tuples). Raises exception
@@ -39,9 +39,26 @@ class TSP():
         self.graphical_tsp = graphical_tsp
         self.points = [node[1] for node in self.graphical_tsp.nodes]
 
-        self._dist_map = GraphResolver.build_dist_map(graphical_tsp, self.distance_function)
-        # self._path_map = GraphResolver.build_path_map(graphical_tsp, self._dist_map)
+        self._build_dist_map()
 
+    def _build_dist_map(self):
+        '''
+        builds 2d array of all given points. This array
+        allows to retrieve the distance from node to
+        any other node in the map
+        '''
+        self.dimension = len(self.graphical_tsp.nodes)
+        self._dist_map = np.zeros([self.dimension, self.dimension])
+
+        nodes = self.graphical_tsp.nodes
+
+        for i, node_1 in enumerate(nodes):
+            for j, node_2 in enumerate(nodes[:i]):
+                if self.graphical_tsp.are_neighbors(node_1, node_2):
+                    dist = self.distance_function(node_1[1], node_2[1])
+                else:
+                    dist = float("inf")
+                self._dist_map[i, j] = self._dist_map[j, i] = dist
 
     def dist_map(self):
         return self._dist_map
@@ -59,6 +76,18 @@ class TSP():
             distance between two points
         '''
         return self._dist_map[point_index_1, point_index_2]
+
+    def path_length(self, path: List[int]):
+        if len(path) == 0:
+            return 0
+
+        length = 0
+        last_node = path[0]
+        for node in path[1:]:
+            length += self.distance(last_node, node)
+            last_node = node
+
+        return length
 
     def get_point(self, index: int) -> Tuple[float, float]:
         return self.points[index]
