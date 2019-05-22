@@ -40,7 +40,7 @@ class TSP():
         self.points = [node[1] for node in self.graphical_tsp.nodes]
 
         self._dist_map = GraphResolver.build_dist_map(graphical_tsp, self.distance_function)
-        self._path_map = GraphResolver.build_path_map(graphical_tsp, self._dist_map)
+        # self._path_map = GraphResolver.build_path_map(graphical_tsp, self._dist_map)
 
 
     def dist_map(self):
