@@ -27,8 +27,8 @@ bands = [
          frequency_range_to=768, loss_per_km=0.055),
 ]
 
-demands = read_demands(data_xml_root)
-
 tsp = TSP(Graphical(data_xml_root))
 
-print(tsp.path_length(demands[0].paths[0]))
+demands = read_demands(data_xml_root, tsp)
+
+print(demands[10])
