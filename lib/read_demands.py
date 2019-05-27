@@ -1,7 +1,7 @@
-from models.models import Demand
+from .telecommunication import Demand
 
 
-def read_demands(root, tsp):
+def read_demands(root, graph):
 
     def reconstruct_path(source, xml_path):
         path = [int(source)]
@@ -12,7 +12,7 @@ def read_demands(root, tsp):
             current_node = link_node_1 if path[-1] == link_node_2 else link_node_2
             path.append(current_node)
 
-        return tsp.path_length(path), path
+        return graph.path_length(path), path
 
     demands = []
     xml_demands = root.find('demands').findall('demand')

@@ -4,7 +4,6 @@ Map represents the map of all points in the problem.
 import numpy as np
 from typing import List, Tuple
 from .graphical import Graphical
-from .graph_resolver import build_dist_map
 
 
 def euclidean_distance(a, b):
@@ -24,8 +23,8 @@ def euclidean_distance(a, b):
     return np.sqrt(diff_x*diff_x + diff_y*diff_y)
 
 
-class TSP():
-    def __init__(self, graphical_tsp: Graphical, distance_function='euclidean') -> None:
+class Graph():
+    def __init__(self, graphical: Graphical, distance_function='euclidean') -> None:
         '''
         Builds the map from the file given in filename kwarg
         or from array of points(2-tuples). Raises exception
@@ -36,8 +35,8 @@ class TSP():
         else:
             raise AttributeError('Function was not specified')
 
-        self.graphical_tsp = graphical_tsp
-        self.points = [node[1] for node in self.graphical_tsp.nodes]
+        self.graphical = graphical
+        self.points = [node[1] for node in self.graphical.nodes]
 
         self._build_dist_map()
 
@@ -47,14 +46,14 @@ class TSP():
         allows to retrieve the distance from node to
         any other node in the map
         '''
-        self.dimension = len(self.graphical_tsp.nodes)
+        self.dimension = len(self.graphical.nodes)
         self._dist_map = np.zeros([self.dimension, self.dimension])
 
-        nodes = self.graphical_tsp.nodes
+        nodes = self.graphical.nodes
 
         for i, node_1 in enumerate(nodes):
             for j, node_2 in enumerate(nodes[:i]):
-                if self.graphical_tsp.are_neighbors(node_1, node_2):
+                if self.graphical.are_neighbors(node_1, node_2):
                     dist = self.distance_function(node_1[1], node_2[1])
                 else:
                     dist = float("inf")

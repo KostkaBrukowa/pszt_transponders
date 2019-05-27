@@ -1,6 +1,8 @@
 import numpy as np
 import xml.etree.ElementTree as ET
 
+from random import randint
+
 
 class Graphical():
     def __init__(self, root):

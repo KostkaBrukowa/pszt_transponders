@@ -1,10 +1,11 @@
-from models.models import Transponder, Band, Demand
-from lib.graphical import Graphical
-from lib.tsp import TSP
-from lib.read_demands import read_demands
 import xml.etree.ElementTree as ET
-import numpy as np
+#import numpy as np
 
+from lib.read_demands import read_demands
+
+from lib.telecommunication import Transponder, Band, Demand, Problem
+from lib.graphical import Graphical
+from lib.graph import Graph
 
 tree = ET.parse('data/polska.xml')
 data_xml_root = tree.getroot()
@@ -27,8 +28,25 @@ bands = [
          frequency_range_to=768, loss_per_km=0.055),
 ]
 
-tsp = TSP(Graphical(data_xml_root))
+graph = Graph(Graphical(data_xml_root))
 
-demands = read_demands(data_xml_root, tsp)
+demands = read_demands(data_xml_root, graph)
 
-print(demands[10])
+problem = Problem(graph, demands)
+
+genom_1 = problem.new_genom()
+
+genom_2 = problem.new_genom()
+
+combined_genom = genom_1.crossing(genom_2)
+
+
+print("genom_1 = ", genom_1.data)
+print("genom_2 = ", genom_2.data)
+print("combined_genom = ", combined_genom.data)
+
+mutated_genom_1 = genom_1.mutation()
+
+print("mutated_genom_1 = ", mutated_genom_1.data)
+
+print(genom_1 == mutated_genom_1)
