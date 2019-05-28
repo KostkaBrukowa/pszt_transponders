@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from typing import Set, List, Tuple
 from .graph import Graph
 
-from random import randrange
+from random import randrange, random
 
 @dataclass(frozen=True)
 class Transponder():
@@ -56,8 +56,11 @@ class Genotype():
     data: List[int]
     problem: Problem
 
+    cost = None
+    solution = None
+
     #multi-point crossing
-    def crossing(self, other_Genotype):
+    def crossover(self, other_Genotype):
         center = len(self.data) // 2
         point_1 = randrange(0, center)
         point_2 = randrange(center, len(self.data))
@@ -77,12 +80,65 @@ class Genotype():
 
         return Genotype(new_data, self.problem)
 
+    def get_cost(self):
+        if self.cost == None:
+            self.calculate_solution()
+        return self.cost
+
+    def get_solution(self):
+        if self.solution == None:
+            self.calculate_solution()
+        return self.solution
+
+    def calculate_solution(self):
+        # to trzeba napisać
+        self.cost = randrange(1,1000000000)
+        self.solution = [1,2,3]
+
+
+@dataclass        
+class GeneticAlgorithm():
+    P: List[Genotype]
+    len_of_P: int
+
+    R: List[Genotype]
+    len_of_R: int
+
+    problem: Problem
+
+    probability_of_mutation: float
+
+    def __init__(self, problem, len_of_P, len_of_R, probability_of_mutation ):
+        self.problem = problem
+        self.len_of_P = len_of_P
+        self.len_of_R = len_of_R
+        self.probability_of_mutation = probability_of_mutation
+        self.P = []
+        self.R = []
+
+    def init_population(self):
+        self.P.clear()
+        for i in range(self.len_of_P):
+            self.P.append(self.problem.new_genotype())
+
+    def generate_new_population(self):
+        self.R.clear()
+        for i in range(self.len_of_R):
+            number_of_genotype_1 = randrange(self.len_of_P)
+            number_of_genotype_2 = randrange(self.len_of_P)
+            new_genotype = self.P[number_of_genotype_1].crossover(self.P[number_of_genotype_2])
+            self.R.append(new_genotype)
+
+        for i in range(self.len_of_R):
+            if random() <= self.probability_of_mutation:
+                self.R[i] = self.R[i].mutation()
         
+        P_union_R = self.P + self.R
+        P_union_R.sort(key=lambda x: x.get_cost())
 
-
+        self.P = P_union_R[0:self.len_of_P]
 
     
-
 # '''
 # This class represents one specific result for one specific
 # demand. Also has methods to check if the result is correct

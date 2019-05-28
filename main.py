@@ -7,6 +7,8 @@ from lib.telecommunication import Transponder, Band, Demand, Problem
 from lib.graphical import Graphical
 from lib.graph import Graph
 
+from lib.telecommunication import GeneticAlgorithm
+
 tree = ET.parse('data/polska.xml')
 data_xml_root = tree.getroot()
 
@@ -34,19 +36,49 @@ demands = read_demands(data_xml_root, graph)
 
 problem = Problem(graph, demands)
 
-genotype_1 = problem.new_genotype()
+# genotype_1 = problem.new_genotype()
 
-genotype_1 = problem.new_genotype()
+# genotype_1 = problem.new_genotype()
 
-combined_genotype = genotype_1.crossing(genotype_1)
+# combined_genotype = genotype_1.crossover(genotype_1)
 
 
-print("genotype_1 = ", genotype_1.data)
-print("genotype_1 = ", genotype_1.data)
-print("combined_genotype = ", combined_genotype.data)
+# print("genotype_1 = ", genotype_1.data)
+# print("genotype_1 = ", genotype_1.data)
+# print("combined_genotype = ", combined_genotype.data)
 
-mutated_genotype_1 = genotype_1.mutation()
+# mutated_genotype_1 = genotype_1.mutation()
 
-print("mutated_genotype_1 = ", mutated_genotype_1.data)
+# print("mutated_genotype_1 = ", mutated_genotype_1.data)
 
-print(genotype_1 == mutated_genotype_1)
+# print(genotype_1 == mutated_genotype_1)
+
+
+gen_alg = GeneticAlgorithm(problem, 3, 123, 1)
+
+gen_alg.init_population()
+
+gen_alg.generate_new_population()
+y = [x.data for x in gen_alg.P]
+print(y)
+print(gen_alg.P[0].get_cost())
+
+gen_alg.generate_new_population()
+y = [x.data for x in gen_alg.P]
+print(y)
+print(gen_alg.P[0].get_cost())
+
+gen_alg.generate_new_population()
+y = [x.data for x in gen_alg.P]
+print(y)
+print(gen_alg.P[0].get_cost())
+
+gen_alg.generate_new_population()
+y = [x.data for x in gen_alg.P]
+print(y)
+print(gen_alg.P[0].get_cost())
+
+gen_alg.generate_new_population()
+y = [x.data for x in gen_alg.P]
+print(y)
+print(gen_alg.P[0].get_cost())
