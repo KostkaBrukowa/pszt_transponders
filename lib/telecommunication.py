@@ -42,41 +42,40 @@ class Problem():
     graph: Graph
     demands: List[Demand]
 
-    def new_genom(self):
+    def new_genotype(self):
         data = []
 
         for demand in self.demands:
             upper_range = len(demand.paths)
             data.append(randrange(upper_range))
 
-        return Genom(data, self)
+        return Genotype(data, self)
 
 @dataclass
-class Genom():
+class Genotype():
     data: List[int]
     problem: Problem
 
     #multi-point crossing
-    def crossing(self, other_genom):
+    def crossing(self, other_Genotype):
         center = len(self.data) // 2
         point_1 = randrange(0, center)
-        print(point_1)
         point_2 = randrange(center, len(self.data))
-        print(point_2)
+
         new_data = (self.data[0 : point_1] 
-                + other_genom.data[point_1 : point_2] 
+                + other_Genotype.data[point_1 : point_2] 
                 + self.data[point_2 : len(self.data)] )
 
-        return Genom(new_data, self.problem)
+        return Genotype(new_data, self.problem)
 
     def mutation(self):
-        random_int = randrange(0, len(self.data) )
+        random_int = randrange(0, len(self.data))
 
         upper_range = len(self.problem.demands[random_int].paths)
         new_data = self.data[:]
         new_data[random_int] = randrange(upper_range)
 
-        return Genom(new_data, self.problem)
+        return Genotype(new_data, self.problem)
 
         
 

@@ -34,19 +34,19 @@ demands = read_demands(data_xml_root, graph)
 
 problem = Problem(graph, demands)
 
-genom_1 = problem.new_genom()
+genotype_1 = problem.new_genotype()
 
-genom_2 = problem.new_genom()
+genotype_1 = problem.new_genotype()
 
-combined_genom = genom_1.crossing(genom_2)
+combined_genotype = genotype_1.crossing(genotype_1)
 
 
-print("genom_1 = ", genom_1.data)
-print("genom_2 = ", genom_2.data)
-print("combined_genom = ", combined_genom.data)
+print("genotype_1 = ", genotype_1.data)
+print("genotype_1 = ", genotype_1.data)
+print("combined_genotype = ", combined_genotype.data)
 
-mutated_genom_1 = genom_1.mutation()
+mutated_genotype_1 = genotype_1.mutation()
 
-print("mutated_genom_1 = ", mutated_genom_1.data)
+print("mutated_genotype_1 = ", mutated_genotype_1.data)
 
-print(genom_1 == mutated_genom_1)
+print(genotype_1 == mutated_genotype_1)
