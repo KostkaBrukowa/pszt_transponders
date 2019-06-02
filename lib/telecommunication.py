@@ -6,7 +6,7 @@ from .pick_transponders import pick_transponders
 import numpy as np
 from itertools import combinations
 
-from random import randrange
+from random import randrange, random
 
 
 @dataclass(frozen=True)
@@ -52,33 +52,34 @@ class Problem():
     graph: Graph
     demands: List[Demand]
 
-    def new_genom(self):
+    def new_genotype(self):
         data = []
 
         for demand in self.demands:
             upper_range = len(demand.paths)
             data.append(randrange(upper_range))
 
-        return Genom(data, self)
+        return Genotype(data, self)
 
 
 @dataclass
-class Genom():
+class Genotype():
     data: List[int]
     problem: Problem
 
+
     # multi-point crossing
     def crossing(self, other_genom):
+
         center = len(self.data) // 2
         point_1 = randrange(0, center)
-        print(point_1)
         point_2 = randrange(center, len(self.data))
-        print(point_2)
+
         new_data = (self.data[0: point_1]
                     + other_genom.data[point_1: point_2]
                     + self.data[point_2: len(self.data)])
 
-        return Genom(new_data, self.problem)
+        return Genotype(new_data, self.problem)
 
     def mutation(self):
         random_int = randrange(0, len(self.data))
@@ -87,7 +88,7 @@ class Genom():
         new_data = self.data[:]
         new_data[random_int] = randrange(upper_range)
 
-        return Genom(new_data, self.problem)
+        return Genotype(new_data, self.problem)
 
     def _update_band_map(self, band_map, frequency_needed, path):
         for start, end in zip(path, path[1:]):
@@ -158,3 +159,46 @@ class Genom():
                           for start, end in combinations(range(self.problem.graph.dimension), 2)])
 
         return transponders_cost + bands_cost, band_map, demands_result
+
+
+@dataclass        
+class GeneticAlgorithm():
+    P: List[Genotype]
+    len_of_P: int
+
+    R: List[Genotype]
+    len_of_R: int
+
+    problem: Problem
+
+    probability_of_mutation: float
+
+    def __init__(self, problem, len_of_P, len_of_R, probability_of_mutation ):
+        self.problem = problem
+        self.len_of_P = len_of_P
+        self.len_of_R = len_of_R
+        self.probability_of_mutation = probability_of_mutation
+        self.P = []
+        self.R = []
+
+    def init_population(self):
+        self.P.clear()
+        for i in range(self.len_of_P):
+            self.P.append(self.problem.new_genotype())
+
+    def generate_new_population(self):
+        self.R.clear()
+        for i in range(self.len_of_R):
+            number_of_genotype_1 = randrange(self.len_of_P)
+            number_of_genotype_2 = randrange(self.len_of_P)
+            new_genotype = self.P[number_of_genotype_1].crossover(self.P[number_of_genotype_2])
+            self.R.append(new_genotype)
+
+        for i in range(self.len_of_R):
+            if random() <= self.probability_of_mutation:
+                self.R[i] = self.R[i].mutation()
+        
+        P_union_R = self.P + self.R
+        P_union_R.sort(key=lambda x: x.get_cost())
+
+        self.P = P_union_R[0:self.len_of_P]
