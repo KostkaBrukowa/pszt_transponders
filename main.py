@@ -53,32 +53,15 @@ problem = Problem(graph, demands, transponders, bands)
 
 # print(genotype_1 == mutated_genotype_1)
 
-
-gen_alg = GeneticAlgorithm(problem, 3, 123, 1)
+gen_alg = GeneticAlgorithm(problem, 200, 1000, 0.05)
 
 gen_alg.init_population()
 
-gen_alg.generate_new_population()
-y = [x.data for x in gen_alg.P]
-print(y)
-print(gen_alg.P[0].get_cost())
 
-gen_alg.generate_new_population()
-y = [x.data for x in gen_alg.P]
-print(y)
-print(gen_alg.P[0].get_cost())
+while True:
+     gen_alg.generate_new_population()
+     # y = [x.data for x in gen_alg.P]
+     # print(y)
+     print(gen_alg.P[0].get_cost())
+     print(gen_alg.P[0].data)
 
-gen_alg.generate_new_population()
-y = [x.data for x in gen_alg.P]
-print(y)
-print(gen_alg.P[0].get_cost())
-
-gen_alg.generate_new_population()
-y = [x.data for x in gen_alg.P]
-print(y)
-print(gen_alg.P[0].get_cost())
-
-gen_alg.generate_new_population()
-y = [x.data for x in gen_alg.P]
-print(y)
-print(gen_alg.P[0].get_cost())
