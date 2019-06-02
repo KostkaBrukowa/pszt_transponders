@@ -34,7 +34,7 @@ graph = Graph(Graphical(data_xml_root))
 
 demands = read_demands(data_xml_root, graph)
 
-problem = Problem(graph, demands)
+problem = Problem(graph, demands, transponders, bands)
 
 # genotype_1 = problem.new_genotype()
 
