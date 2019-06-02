@@ -51,6 +51,8 @@ class DemandResult():
 class Problem():
     graph: Graph
     demands: List[Demand]
+    transponders: List[Transponder]
+    bands: List[Band]
 
     def new_genotype(self):
         data = []
@@ -67,9 +69,11 @@ class Genotype():
     data: List[int]
     problem: Problem
 
+    cost = None
+
 
     # multi-point crossing
-    def crossing(self, other_genom):
+    def crossover(self, other_genom):
 
         center = len(self.data) // 2
         point_1 = randrange(0, center)
@@ -89,6 +93,12 @@ class Genotype():
         new_data[random_int] = randrange(upper_range)
 
         return Genotype(new_data, self.problem)
+
+
+    def get_cost(self):
+        if self.cost == None:
+            self.cost = self.calculate_result()[0]
+        return self.cost
 
     def _update_band_map(self, band_map, frequency_needed, path):
         for start, end in zip(path, path[1:]):
@@ -121,7 +131,7 @@ class Genotype():
 
         return bands_sum
 
-    def calculate_result(self, bands: List[Band], transponders: List[Transponder]):
+    def calculate_result(self):
         """
         calculate result based on data. returns 
         tuple of [cost of whole result, band_map, demands with frequencies]
@@ -129,6 +139,9 @@ class Genotype():
         band_map -> 2D nd_array with values as lowest free frequency on an edge
         demands with frequencies -> List[DemandResult]
         """
+        transponders = self.problem.transponders
+        bands = self.problem.bands
+
         demands_result = []
         graph = self.problem.graph
         band_map = np.ones([graph.dimension, graph.dimension], dtype=int)
