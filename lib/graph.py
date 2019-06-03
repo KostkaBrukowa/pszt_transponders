@@ -20,7 +20,7 @@ def euclidean_distance(a, b):
     '''
     diff_x = (a[0] - b[0])
     diff_y = (a[1] - b[1])
-    return np.sqrt(diff_x*diff_x + diff_y*diff_y)
+    return np.sqrt(diff_x*diff_x + diff_y*diff_y) * 69
 
 
 class Graph():

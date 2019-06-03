@@ -1,4 +1,5 @@
 import xml.etree.ElementTree as ET
+import json
 #import numpy as np
 
 from lib.read_demands import read_demands
@@ -31,37 +32,32 @@ bands = [
 ]
 
 graph = Graph(Graphical(data_xml_root))
-
 demands = read_demands(data_xml_root, graph)
 
 problem = Problem(graph, demands, transponders, bands)
 
-# genotype_1 = problem.new_genotype()
-
-# genotype_1 = problem.new_genotype()
-
-# combined_genotype = genotype_1.crossover(genotype_1)
-
-
-# print("genotype_1 = ", genotype_1.data)
-# print("genotype_1 = ", genotype_1.data)
-# print("combined_genotype = ", combined_genotype.data)
-
-# mutated_genotype_1 = genotype_1.mutation()
-
-# print("mutated_genotype_1 = ", mutated_genotype_1.data)
-
-# print(genotype_1 == mutated_genotype_1)
-
-gen_alg = GeneticAlgorithm(problem, 200, 1000, 0.05)
-
+gen_alg = GeneticAlgorithm(problem, 2000, 5000, 0.01)
 gen_alg.init_population()
 
-
+period_of_save_result = 10
+i = 1
 while True:
      gen_alg.generate_new_population()
-     # y = [x.data for x in gen_alg.P]
-     # print(y)
-     print(gen_alg.P[0].get_cost())
-     print(gen_alg.P[0].data)
+
+     print("Epoch nr", i)
+     print("Best result:")
+     print("   Cost = ", gen_alg.P[0].get_cost())
+     print("   Genotype = ", gen_alg.P[0].data)
+     print()
+
+     if i % period_of_save_result == 0:
+          with open("result/epoch_" + str(i) + ".json", "w") as f:
+               best_result = gen_alg.P[0].calculate_result()
+               best_result_as_dict = { "cost": best_result[0],
+                                   "band_map": best_result[1],
+                                   "demands_result": best_result[2]
+                                   }
+               f.write(str(best_result_as_dict))
+     i += 1
+     
 
