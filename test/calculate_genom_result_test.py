@@ -1,5 +1,5 @@
 import unittest
-from lib.telecommunication import Transponder, Band, Demand, Problem, Genom
+from lib.telecommunication import Transponder, Band, Demand, Problem, Genotype
 from lib.graphical import Graphical
 from itertools import combinations
 
@@ -27,18 +27,20 @@ class TSPTests(unittest.TestCase):
 
         self.demands = [
             Demand(id=1, node1=1, node2=2, bitrate=100,
-                   paths=[(10, [1, 2]), (14, [1, 3, 2])]),
+                   paths=[(10, [( 1, 2 )]), (14, [(1, 3), (2, 3)])]),
+
             Demand(id=2, node1=1, node2=3, bitrate=80,
-                   paths=[(10, [1, 3]), (14, [1, 2, 3])]),
+                   paths=[(10, [( 1, 3 )]), (14, [(1, 2), (2, 3)])]),
         ]
 
-        graph = MockedGraph(4)
-        self.problem: Problem = Problem(graph, self.demands)
+        self.graph = MockedGraph(4)
+        self.problem: Problem = Problem(
+            self.graph, self.demands, self.transponders, self.bands)
 
     def test_genom_cost(self):
-        genom = Genom(data=[1, 1], problem=self.problem)
+        genom = Genotype(data=[1, 1], problem=self.problem)
 
-        cost, _, _ = genom.calculate_result(self.bands, self.transponders)
+        cost, _, _ = genom.calculate_result()
 
         self.assertEqual(
             cost, 2 * self.transponders[1].cost + 3 * self.bands[0].cost)
@@ -51,9 +53,12 @@ class TSPTests(unittest.TestCase):
                  frequency_range_to=20, loss_per_km=0.055),
         ]
 
-        genom = Genom(data=[1, 1], problem=self.problem)
+        problem = Problem(
+            self.graph, self.demands, self.transponders, bands)
 
-        cost, _, _ = genom.calculate_result(bands, self.transponders)
+        genom = Genotype(data=[1, 1], problem=problem)
+
+        cost, _, _ = genom.calculate_result()
 
         self.assertEqual(
             cost, 2 * self.transponders[1].cost + 3 * bands[0].cost + bands[1].cost)
@@ -64,32 +69,34 @@ class TSPTests(unittest.TestCase):
                  frequency_range_to=4, loss_per_km=0.046),
         ]
 
-        genom = Genom(data=[1, 1], problem=self.problem)
+        problem = Problem(
+            self.graph, self.demands, self.transponders, bands)
 
-        cost, _, _ = genom.calculate_result(bands, self.transponders)
+        genom = Genotype(data=[1, 1], problem=problem)
+
+        cost, _, _ = genom.calculate_result()
 
         self.assertEqual(cost, float('inf'))
 
     def test_band_map(self):
-        genom = Genom(data=[1, 1], problem=self.problem)
+        genom = Genotype(data=[1, 1], problem=self.problem)
 
-        _, band_map, _ = genom.calculate_result(self.bands, self.transponders)
+        _, band_map, _ = genom.calculate_result()
 
         '''paths are [1,3,2] and [1,2,3] with second transponder'''
         self.assertEqual(band_map[1, 3], 4)
 
         self.assertEqual(band_map[1, 2], 4)
 
-        self.assertEqual(band_map[3, 2], 7)
+        self.assertEqual(band_map[2, 3], 7)
 
-        for i, j in combinations(range(len(band_map)), 2):
-            self.assertEqual(band_map[i, j], band_map[j, i])
+        # for i, j in combinations(range(len(band_map)), 2):
+        #     self.assertEqual(band_map[i, j], band_map[j, i])
 
     def test_transponders_frequency(self):
-        genom = Genom(data=[1, 1], problem=self.problem)
+        genom = Genotype(data=[1, 1], problem=self.problem)
 
-        _, _, demands_result = genom.calculate_result(
-            self.bands, self.transponders)
+        _, _, demands_result = genom.calculate_result()
 
         self.assertEqual(demands_result[0].transponders[0][0], 1)
         self.assertEqual(demands_result[1].transponders[0][0], 4)
@@ -97,15 +104,15 @@ class TSPTests(unittest.TestCase):
     def test_transponders_frequency_multiple_tranponders(self):
         demands = [
             Demand(id=1, node1=1, node2=2, bitrate=200,
-                   paths=[(10, [1, 2]), (14, [1, 3, 2])]),
+                   paths=[(10, [1, 2]), (14, [(1, 3), (2, 3)])]),
         ]
 
-        problem = Problem(MockedGraph(4), demands)
+        problem = Problem(MockedGraph(4), demands,
+                          self.transponders, self.bands)
 
-        genom = Genom(data=[1, 1], problem=problem)
+        genom = Genotype(data=[1, 1], problem=problem)
 
-        _, _, demands_result = genom.calculate_result(
-            self.bands, self.transponders)
+        _, _, demands_result = genom.calculate_result()
 
         self.assertEqual(demands_result[0].transponders[0][0], 1)
         self.assertEqual(demands_result[0].transponders[1][0], 4)
