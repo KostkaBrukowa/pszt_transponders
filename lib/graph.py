@@ -76,17 +76,8 @@ class Graph():
         '''
         return self._dist_map[point_index_1, point_index_2]
 
-    def path_length(self, path: List[int]):
-        if len(path) == 0:
-            return 0
-
-        length = 0
-        last_node = path[0]
-        for node in path[1:]:
-            length += self.distance(last_node, node)
-            last_node = node
-
-        return length
+    def path_length(self, path: List[Tuple[int, int]]):
+        return sum([self.distance(a, b) for a, b in path])
 
     def get_point(self, index: int) -> Tuple[float, float]:
         return self.points[index]

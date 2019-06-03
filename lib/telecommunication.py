@@ -1,12 +1,17 @@
 from dataclasses import dataclass
 from typing import Set, List, Tuple
 from .graph import Graph
-# from .calculate_result import calculate_result
 from .pick_transponders import pick_transponders
 import numpy as np
-from itertools import combinations
+from itertools import combinations, tee
 
 from random import randrange, random
+
+def pairwise(iterable):
+    "s -> (s0,s1), (s1,s2), (s2, s3), ..."
+    a, b = tee(iterable)
+    next(b, None)
+    return zip(a, b)
 
 
 @dataclass(frozen=True)
@@ -45,6 +50,7 @@ class Demand():
 class DemandResult():
     transponders: List[Tuple[int, Transponder]]
     demand: Demand
+    path_index: int
 
 
 @dataclass
@@ -101,9 +107,9 @@ class Genotype():
         return self.cost
 
     def _update_band_map(self, band_map, frequency_needed, path):
-        for start, end in zip(path, path[1:]):
+        for start, end in path:
             band_map[start, end] += frequency_needed
-            band_map[end, start] += frequency_needed
+            # band_map[end, start] += frequency_needed
 
     def _pick_frequencies_for_transponders(self, min_frequency, transponders):
         current_frequency = min_frequency
@@ -115,15 +121,15 @@ class Genotype():
 
         return transponders_with_frequencies
 
-    def _pick_band_cost(self, frequency, bands):
+    def _pick_band_cost(self, frequency):
         if frequency == 1:
             return 0
 
-        if bands[-1].frequency_range_to < frequency:
+        if self.problem.bands[-1].frequency_range_to < frequency:
             return float('inf')
 
         bands_sum = 0
-        for band in bands:
+        for band in self.problem.bands:
             if band.frequency_range_from > frequency:
                 break
 
@@ -147,7 +153,8 @@ class Genotype():
         band_map = np.ones([graph.dimension, graph.dimension], dtype=int)
 
         for index, demand in enumerate(self.problem.demands):
-            path_length, path = demand.paths[self.data[index]]
+            path_index = self.data[index]
+            path_length, path = demand.paths[path_index]
             picked_transponders = pick_transponders(
                 demand.bitrate, path_length, transponders, bands[-1])
 
@@ -155,7 +162,7 @@ class Genotype():
                 [t.frequency_width for t in picked_transponders])
 
             min_frequency = max([band_map[start, end]
-                                 for start, end in zip(path, path[1:])])
+                                 for start, end in path])
 
             transponders_with_frequencies = self._pick_frequencies_for_transponders(
                 min_frequency, picked_transponders)
@@ -163,12 +170,12 @@ class Genotype():
             self._update_band_map(band_map, frequency_width_needed, path)
 
             demands_result.append(DemandResult(
-                transponders_with_frequencies, demand))
+                transponders_with_frequencies, demand, path_index))
 
         transponders_cost = sum([transponder.cost for demand_result in demands_result
                                  for _, transponder in demand_result.transponders])
 
-        bands_cost = sum([self._pick_band_cost(band_map[start, end], bands)
+        bands_cost = sum([self._pick_band_cost(band_map[start, end])
                           for start, end in combinations(range(self.problem.graph.dimension), 2)])
 
         return transponders_cost + bands_cost, band_map, demands_result
